@@ -1,0 +1,30 @@
+---
+
+- name: Install and configure Apache servers
+  hosts: servers
+  become: yes
+  vars:
+    - new_port: 81
+  handler:
+    - name: restart apache
+      service: name=httpd state=restarted enabled=yes
+  tasks:
+    - name: Install httpd
+      ansible.builtin.yum:
+        name: httpd
+        state: present
+    - name: Start and enable apache
+      ansible.builtin.service:
+        name: httpd
+        state: started
+        enabled: yes
+    - name: Change default port
+      ansible.builtin.lineinfile:
+        path: /etc/httpd/conf/httpd.conf
+        regexp: 'Listen \d+'
+        line: 'Listen {{ new_port }}'
+      notify:
+        - restart apache
+
+
+
